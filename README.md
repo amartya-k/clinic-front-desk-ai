@@ -66,6 +66,19 @@ python3 booking.py       # booking / reschedule / cancel self-tests (10/10)
 python3 guardrails.py    # guardrail classifier cases (11/11)
 ```
 
+### Demo website
+
+```bash
+python3 ui_server.py     # then open http://localhost:8765
+```
+
+A single-page website for the live demo: a patient phone on the left
+(simulate a missed call, tap scenario lines or type freely) and the staff
+dashboard on the right — analytics, the escalation queue, takeover
+controls, and the appointment slots. Every button calls the same
+`SmsFlow` / `Schedule` / guardrails code the tests exercise. State starts
+fresh on each launch and can be reset from the page between takes.
+
 `demo_runner.py` runs in throwaway temp state and exits 0 only if every
 check passes. To reset a manual run, delete `schedule_state.json` /
 `sms_state.json` next to the modules.
@@ -77,14 +90,17 @@ otherwise runs in stub mode against the same interface:
 
 ```bash
 export META_MODEL_API_KEY=...        # set via secure entry, never committed
-export META_MODEL_API_URL=...        # endpoint from the organizers' docs
-export META_MODEL_NAME=muse-spark    # optional; this is the default
+export META_MODEL_API_URL=https://api.meta.ai/v1/chat/completions
+export META_MODEL_NAME=muse-spark-1.3   # optional; this is the default
 python3 meta_client.py               # prints "mode: live" or "mode: stub"
 ```
 
-Current status (2026-10-31): the $150 hackathon credits claim has been
-submitted and is awaiting batch crediting, so the build is being hardened
-and demoed in stub mode; the live flip is only the env vars above.
+Current status (2026-10-31): LIVE. The $150 hackathon credits landed, the
+author's key is connected through a secure credential store, and the full
+demo passes 17/17 against the real `muse-spark-1.3` model. A local spend
+guard caps output tokens per reply and refuses live calls well under the
+$150 credit total. On any other machine the same code runs live with the
+env vars above, or offline in stub mode with no key at all.
 SMS transport is likewise simulated behind one seam (`send_sms()` in
 `sms_flow.py`) — swapping in Twilio is a single-function change.
 
@@ -97,6 +113,8 @@ SMS transport is likewise simulated behind one seam (`send_sms()` in
 | `booking.py` | Mock-schedule booking engine (request-only semantics) |
 | `meta_client.py` | Meta Model API client with stub fallback |
 | `demo_runner.py` | End-to-end run of the 4 demo scenarios + transcript |
+| `ui_server.py` | Local web server for the demo website (stdlib only) |
+| `ui.html` | The demo website page: patient phone + staff dashboard |
 | `system_prompt.md` | The agent's grounding and never-do rules |
 | `clinic_knowledge.json` | Fictional clinic facts + mock schedule (only fact source) |
 

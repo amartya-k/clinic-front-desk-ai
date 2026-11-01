@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bright Smiles Dental — AI Front Desk</title>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#ffffff; --ink:#0f172a; --muted:#64748b;
+    --line:#e2e8f0; --brand:#0ea5e9; --brand-dark:#0284c7;
+    --agent:#f1f5f9; --patient:#0ea5e9; --staff:#16a34a; --alert:#dc2626;
+    --amber:#f59e0b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:linear-gradient(160deg,#0f172a 0%,#164e63 100%);color:var(--ink);min-height:100vh}
+  header{display:flex;align-items:center;gap:14px;padding:16px 22px;color:#fff;flex-wrap:wrap}
+  .logo{width:44px;height:44px;border-radius:12px;background:#fff;color:var(--brand-dark);
+        display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800}
+  header h1{font-size:20px;margin:0}
+  header p{margin:2px 0 0;color:#bae6fd;font-size:13px}
+  .spacer{flex:1}
+  .badge{padding:5px 12px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.04em}
+  .badge.live{background:#16a34a;color:#fff}
+  .badge.stub{background:#f59e0b;color:#fff}
+  button{font:inherit;cursor:pointer;border:none;border-radius:10px;padding:9px 14px;font-weight:600}
+  .btn-ghost{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.35)}
+  main{display:grid;grid-template-columns:400px 1fr;gap:18px;padding:0 22px 22px;align-items:start}
+  @media (max-width:980px){main{grid-template-columns:1fr}}
+  .card{background:var(--panel);border-radius:18px;box-shadow:0 12px 32px rgba(2,6,23,.35)}
+  /* phone */
+  .phone{padding:0;overflow:hidden}
+  .phone-head{background:#f8fafc;border-bottom:1px solid var(--line);padding:14px 16px}
+  .tabs{display:flex;gap:8px;margin-bottom:12px}
+  .tab{flex:1;background:#e2e8f0;color:var(--ink);padding:8px 4px;font-size:13px;border-radius:10px}
+  .tab.active{background:var(--brand);color:#fff}
+  .missed{width:100%;background:#fff;border:2px dashed var(--brand);color:var(--brand-dark)}
+  .chat{height:430px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:8px;background:#f8fafc}
+  .msg{max-width:82%;padding:9px 13px;border-radius:16px;font-size:14px;line-height:1.4;white-space:pre-wrap;word-wrap:break-word}
+  .msg.agent{background:var(--agent);align-self:flex-start;border-bottom-left-radius:4px}
+  .msg.staff{background:#dcfce7;align-self:flex-start;border-bottom-left-radius:4px}
+  .msg.patient{background:var(--patient);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+  .who{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;opacity:.65;margin-bottom:2px}
+  .empty{color:var(--muted);text-align:center;margin:auto;font-size:14px;padding:0 20px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 12px;border-top:1px solid var(--line)}
+  .chip{background:#e0f2fe;color:var(--brand-dark);font-size:12px;padding:6px 10px;border-radius:999px;font-weight:600}
+  .chip.danger{background:#fee2e2;color:var(--alert)}
+  .composer{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+  .composer input{flex:1;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit}
+  .send{background:var(--brand);color:#fff}
+  /* dashboard */
+  .dash{display:flex;flex-direction:column;gap:18px}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+  .tile{background:var(--panel);border-radius:16px;padding:14px 16px;box-shadow:0 12px 32px rgba(2,6,23,.25)}
+  .tile .n{font-size:26px;font-weight:800}
+  .tile .l{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+  .panel{padding:16px 18px}
+  .panel h2{margin:0 0 4px;font-size:16px}
+  .panel .sub{color:var(--muted);font-size:13px;margin:0 0 12px}
+  .esc{border:1px solid #fecaca;background:#fef2f2;border-radius:12px;padding:12px 14px;margin-bottom:10px}
+  .esc .t{font-weight:700;color:var(--alert)}
+  .esc .s{font-size:13px;margin:4px 0 10px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .btn-sm{padding:7px 12px;font-size:13px;border-radius:8px}
+  .btn-red{background:var(--alert);color:#fff}
+  .btn-green{background:var(--staff);color:#fff}
+  .btn-slate{background:#e2e8f0;color:var(--ink)}
+  .btn-blue{background:var(--brand);color:#fff}
+  .none{color:var(--muted);font-size:14px}
+  .slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+  .slot{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px}
+  .slot .id{font-weight:800}
+  .slot.open{border-color:#bbf7d0;background:#f0fdf4}
+  .slot.taken{border-color:#fde68a;background:#fffbeb}
+  .pill{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;margin-top:4px}
+  .pill.open{background:#dcfce7;color:#166534}
+  .pill.taken{background:#fef3c7;color:#92400e}
+  .staffbox{display:flex;gap:8px}
+  .staffbox input{flex:1;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit}
+  .statusline{font-size:13px;margin-bottom:10px}
+  .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+  .dot.on{background:var(--staff)} .dot.off{background:#cbd5e1}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">B</div>
+  <div>
+    <h1>Bright Smiles Dental — AI Front Desk</h1>
+    <p>Missed-call rescue: instant text-back, booking by SMS, safe escalation to staff. Powered by Muse Spark.</p>
+  </div>
+  <div class="spacer"></div>
+  <span id="mode" class="badge stub">…</span>
+  <button class="btn-ghost" id="reset">Reset demo</button>
+</header>
+
+<main>
+  <!-- Patient phone -->
+  <section class="card phone">
+    <div class="phone-head">
+      <div class="tabs" id="tabs"></div>
+      <button class="missed" id="missed">Simulate a missed call from this patient</button>
+    </div>
+    <div class="chat" id="chat"><div class="empty">No conversation yet.<br>Simulate a missed call to watch the text-back arrive.</div></div>
+    <div class="chips" id="chips"></div>
+    <div class="composer">
+      <input id="input" type="text" placeholder="Type as the patient…" autocomplete="off">
+      <button class="send" id="send">Send</button>
+    </div>
+  </section>
+
+  <!-- Staff dashboard -->
+  <section class="dash">
+    <div class="tiles" id="tiles"></div>
+
+    <div class="card panel">
+      <h2>Escalations — needs a human</h2>
+      <p class="sub">Guardrails catch urgent, clinical, and sensitive messages before the model ever sees them, and queue them here.</p>
+      <div id="escalations"><span class="none">No open escalations.</span></div>
+    </div>
+
+    <div class="card panel">
+      <h2>Front-desk controls</h2>
+      <p class="sub">Take over the selected patient's conversation and the agent goes silent until you hand it back.</p>
+      <div class="statusline" id="takeover-status"></div>
+      <div class="row" style="margin-bottom:10px">
+        <button class="btn-sm btn-red" id="takeover">Take over conversation</button>
+        <button class="btn-sm btn-slate" id="release">Hand back to agent</button>
+      </div>
+      <div class="staffbox">
+        <input id="staff-input" type="text" placeholder="Reply as front-desk staff…" autocomplete="off">
+        <button class="btn-sm btn-green" id="staff-send">Send as staff</button>
+      </div>
+    </div>
+
+    <div class="card panel">
+      <h2>Appointment slots</h2>
+      <p class="sub">Bookings land as requests for staff to confirm — never as silent confirmations.</p>
+      <div class="slots" id="slots"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const PATIENTS = [
+  {phone:"+1-555-010-1111", name:"Demo Patient",  label:"Patient 1"},
+  {phone:"+1-555-010-2222", name:"Second Patient", label:"Patient 2"},
+  {phone:"+1-555-010-3333", name:"Third Patient",  label:"Patient 3"},
+];
+const CHIPS = [
+  "What time do you close on Friday?",
+  "I'd like to book a cleaning",
+  "S1 please",
+  "Can I move my appointment to S2?",
+  "Actually, please cancel it",
+  "I have severe pain and my face is swelling",
+  "STOP",
+];
+let current = 0;
+let S = null;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+async function api(path, body){
+  const r = await fetch(path, {method:"POST", headers:{"Content-Type":"application/json"},
+                               body: JSON.stringify(body || {})});
+  const d = await r.json();
+  if (d.state) { S = d.state; render(); }
+  return d;
+}
+async function refresh(){
+  const r = await fetch("/api/state"); S = await r.json(); render();
+}
+
+function render(){
+  if (!S) return;
+  const mode = $("mode");
+  mode.textContent = S.mode === "live" ? "LIVE — " + S.model : "STUB MODE";
+  mode.className = "badge " + (S.mode === "live" ? "live" : "stub");
+
+  // tabs
+  $("tabs").innerHTML = PATIENTS.map((p,i) =>
+    `<button class="tab ${i===current?"active":""}" data-i="${i}">${p.label}<br><small>${esc(p.name)}</small></button>`).join("");
+  document.querySelectorAll(".tab").forEach(t => t.onclick = () => { current = +t.dataset.i; render(); });
+
+  // chat for current patient
+  const p = PATIENTS[current];
+  const conv = (S.conversations || {})[p.phone];
+  const chat = $("chat");
+  if (!conv || !conv.history.length){
+    chat.innerHTML = `<div class="empty">No conversation yet.<br>Simulate a missed call to watch the text-back arrive.</div>`;
+  } else {
+    chat.innerHTML = conv.history.map(m => {
+      const who = m.from === "patient" ? p.name : (m.from === "staff" ? "Front desk (staff)" : "AI agent");
+      return `<div class="msg ${m.from}"><div class="who">${esc(who)}</div>${esc(m.text)}</div>`;
+    }).join("");
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  // chips
+  $("chips").innerHTML = CHIPS.map(c =>
+    `<button class="chip ${c==="STOP"?"danger":""}" data-c="${esc(c)}">${esc(c)}</button>`).join("");
+  document.querySelectorAll(".chip").forEach(ch => ch.onclick = () => sendPatient(ch.dataset.c));
+
+  // analytics tiles
+  const a = S.analytics || {};
+  const tiles = [
+    [a.missed_calls_texted_back, "Missed calls texted back"],
+    [a.booking_requests_open, "Booking requests open"],
+    [a.booking_requests_total, "Booking requests total"],
+    [a.escalations_open, "Escalations open"],
+    [a.escalations_resolved, "Escalations resolved"],
+    [a.numbers_opted_out, "Numbers opted out"],
+    [a.messages_sent, "Messages sent"],
+  ];
+  $("tiles").innerHTML = tiles.map(([n,l]) =>
+    `<div class="tile"><div class="n">${n ?? 0}</div><div class="l">${l}</div></div>`).join("");
+
+  // escalations
+  const escs = S.open_escalations || [];
+  $("escalations").innerHTML = escs.length ? escs.map(e =>
+    `<div class="esc">
+       <div class="t">${esc(e.id)} — ${esc(e.patient)} (${esc(e.phone)})</div>
+       <div class="s">${esc(e.summary)}</div>
+       <div class="row">
+         <button class="btn-sm btn-red" data-take="${esc(e.phone)}">Take over</button>
+         <button class="btn-sm btn-green" data-resolve="${esc(e.id)}">Resolve</button>
+       </div>
+     </div>`).join("")
+    : `<span class="none">No open escalations.</span>`;
+  document.querySelectorAll("[data-take]").forEach(b => b.onclick = async () => {
+    const ph = b.dataset.take;
+    current = PATIENTS.findIndex(x => x.phone === ph);
+    await api("/api/staff/takeover", {phone: ph});
+  });
+  document.querySelectorAll("[data-resolve]").forEach(b => b.onclick = () =>
+    api("/api/escalation/resolve", {id: b.dataset.resolve}));
+
+  // takeover status for selected patient
+  const taken = conv && conv.taken_over;
+  $("takeover-status").innerHTML =
+    `<span class="dot ${taken?"on":"off"}"></span>` +
+    (taken ? `<b>Staff is handling ${esc(p.name)}</b> — the agent will not auto-reply.`
+           : `The agent is handling ${esc(p.name)} automatically.`);
+
+  // slots
+  $("slots").innerHTML = (S.slots || []).map(s =>
+    `<div class="slot ${s.booked?"taken":"open"}">
+       <span class="id">${esc(s.id)}</span> — ${esc(s.date)} at ${esc(s.time)}<br>
+       ${esc(s.type)} · ${esc(s.provider)}<br>
+       <span class="pill ${s.booked?"taken":"open"}">${s.booked ? "Requested by " + esc(s.patient || "patient") : "Open"}</span>
+     </div>`).join("");
+}
+
+async function sendPatient(text){
+  text = (text ?? $("input").value).trim();
+  if (!text) return;
+  $("input").value = "";
+  await api("/api/message", {phone: PATIENTS[current].phone, text});
+}
+
+$("send").onclick = () => sendPatient();
+$("input").addEventListener("keydown", e => { if (e.key === "Enter") sendPatient(); });
+$("missed").onclick = () => api("/api/missed-call", {phone: PATIENTS[current].phone, name: PATIENTS[current].name});
+$("reset").onclick = async () => { await api("/api/reset", {}); };
+$("takeover").onclick = () => api("/api/staff/takeover", {phone: PATIENTS[current].phone});
+$("release").onclick = () => api("/api/staff/release", {phone: PATIENTS[current].phone});
+$("staff-send").onclick = async () => {
+  const v = $("staff-input").value.trim(); if (!v) return;
+  $("staff-input").value = "";
+  await api("/api/staff/send", {phone: PATIENTS[current].phone, text: v});
+};
+$("staff-input").addEventListener("keydown", e => { if (e.key === "Enter") $("staff-send").click(); });
+
+refresh();
+setInterval(refresh, 4000);
+</script>
+</body>
+</html>
