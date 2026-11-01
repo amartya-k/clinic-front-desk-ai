@@ -1,9 +1,13 @@
-"""Meta Model API client with stub mode — hackathon v1 (2026-10-27).
+"""Meta Model API client — hackathon v1 (2026-10-27, live since 2026-10-31).
 
-Why the stub: Amartya's $150 credits are still gated on adding a card to the
-Meta Model API account. Per the build plan's risk note, everything else is
-built against this interface now; when the key/credits land, set
-META_MODEL_API_KEY and the same code path calls the real API.
+Calls Muse Spark on the Meta Model API. Two transports:
+- "env" (default): direct call using META_MODEL_API_KEY / META_MODEL_API_URL
+  from the environment — how judges run it with their own key.
+- "connector": routes through the author's stored Meta Model Api credential
+  so the key never sits in a file or environment variable.
+With neither configured it falls back to stub mode, returning canned replies
+so the rest of the system (guardrails, booking, SMS flow, demo) still runs
+and tests end to end offline.
 Endpoint/model are read from env so they can be corrected from the
 organizers' docs without code changes.
 
